@@ -20,6 +20,16 @@ def _http_allowed_methods() -> list[str]:
     return [str(item).strip().upper() for item in values if str(item).strip()]
 
 
+def _resolved_gemini_api_version() -> str:
+    configured = str(current_app.config.get("GEMINI_API_VERSION") or "v1beta").strip() or "v1beta"
+    if configured == "v1":
+        current_app.logger.warning(
+            "GEMINI_API_VERSION=v1 is not compatible with this API-key Gemini chat flow; using v1beta instead."
+        )
+        return "v1beta"
+    return configured
+
+
 def _infer_site_aliases() -> dict[str, str]:
     aliases: dict[str, str] = {}
     for host in _http_allowed_host_headers():
@@ -335,7 +345,7 @@ def run_chat(
     tool_trace: list[dict[str, Any]] = []
     with genai.Client(
         api_key=gemini_api_key,
-        http_options={"api_version": current_app.config["GEMINI_API_VERSION"]},
+        http_options={"api_version": _resolved_gemini_api_version()},
     ) as client:
         response = None
         for _ in range(4):
