@@ -37,14 +37,14 @@ def _base_query(
 
 
 
-def _event_preview(event: TerminalEvent, limit: int = 400) -> dict:
+def _event_preview(event: TerminalEvent, limit: int = 1000) -> dict:
     return {
         "seq": event.seq,
         "cmd": event.cmd,
         "cwd": event.cwd,
         "exit_code": event.exit_code,
         "finished_at": event.finished_at.astimezone(timezone.utc).isoformat(),
-        "output_preview": event.output[:limit],
+        "output_preview": event.output[limit:],
     }
 
 
